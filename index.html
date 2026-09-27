@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>INCOSE SEP Practice Exam</title>
+  <meta name="description" content="200-question study exam for the INCOSE ASEP/CSEP knowledge exam, based on the SE Handbook 5th Edition, with explanations for every option.">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply saved theme before paint to avoid a flash.
+    try { var t = localStorage.getItem("sep-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap header-row">
+      <p class="brand"><span aria-hidden="true">◆</span> SEP Practice Exam <span class="brand-sub">SE Handbook 5th Ed.</span></p>
+      <div class="header-tools">
+        <div id="timer" class="timer" hidden>
+          <span class="visually-hidden">Time remaining: </span>
+          <span id="timer-text" aria-hidden="false">--:--</span>
+          <button type="button" id="pause-btn" class="btn btn-small">Pause</button>
+        </div>
+        <button type="button" id="theme-btn" class="btn btn-small" aria-label="Switch colour theme">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Timer milestones and other status for screen readers -->
+  <div id="announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+  <main id="main" class="wrap" tabindex="-1">
+
+    <!-- ============ START ============ -->
+    <section id="view-start" aria-labelledby="start-title">
+      <h1 id="start-title">INCOSE ASEP / CSEP Knowledge Exam — Practice &amp; Study</h1>
+      <p class="lead">A 200-question bank written against the <strong>INCOSE Systems Engineering Handbook, 5th Edition</strong>.
+        Every option — right and wrong — comes with an explanation, so each mistake teaches you something.</p>
+
+      <div class="card info">
+        <h2>About the real exam</h2>
+        <ul>
+          <li>Source: the INCOSE SE Handbook, 5th Edition (sole source since 15 March 2025).</li>
+          <li>Usually 120 multiple-choice questions (100 scored + 20 unscored trial questions). You can't tell which ones are unscored.</li>
+          <li>1 minute per question (120 minutes). Four options per question, one correct answer.</li>
+          <li>No fixed published pass mark (INCOSE balances for difficulty). Aim for a steady <strong>70%+</strong> here before booking.</li>
+        </ul>
+      </div>
+
+      <div id="resume-box" class="card resume" hidden>
+        <h2>Unfinished session found</h2>
+        <p id="resume-text"></p>
+        <div class="btn-row">
+          <button type="button" id="resume-btn" class="btn btn-primary">Resume</button>
+          <button type="button" id="discard-btn" class="btn">Discard it</button>
+        </div>
+      </div>
+
+      <form id="start-form" class="card" novalidate>
+        <fieldset>
+          <legend><h2>1. Choose a mode</h2></legend>
+          <div class="mode-list">
+            <label class="mode">
+              <input type="radio" name="mode" value="study" checked>
+              <span><strong>Study mode</strong> — untimed. After each answer you see why every option is right or wrong. Best for learning.</span>
+            </label>
+            <label class="mode">
+              <input type="radio" name="mode" value="sim">
+              <span><strong>Real-exam simulation</strong> — 120 random questions, 120 minutes, results only at the end.</span>
+            </label>
+            <label class="mode">
+              <input type="radio" name="mode" value="full">
+              <span><strong>Full bank exam</strong> — all 200 questions, 200 minutes, results only at the end.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset id="domain-fieldset">
+          <legend><h2>2. Topics <span class="hint">(study mode only)</span></h2></legend>
+          <div class="btn-row">
+            <button type="button" id="all-domains" class="btn btn-small">Select all</button>
+            <button type="button" id="no-domains" class="btn btn-small">Select none</button>
+          </div>
+          <div id="domain-list" class="domain-list"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend><h2>3. Options</h2></legend>
+          <label class="check"><input type="checkbox" id="opt-timer-study"> Show an elapsed-time clock in study mode</label>
+        </fieldset>
+
+        <p id="start-error" class="error" role="alert"></p>
+        <button type="submit" class="btn btn-primary btn-large">Start</button>
+      </form>
+
+      <details class="card">
+        <summary><h2 class="inline">How to study with this</h2></summary>
+        <ol>
+          <li><strong>Learn:</strong> Study mode, one chapter at a time. Read every explanation — including for options you didn't pick.</li>
+          <li><strong>Check:</strong> Keep the handbook open. Each question cites where the topic lives in the SE Handbook.</li>
+          <li><strong>Test:</strong> Take the 120-question simulation under time pressure.</li>
+          <li><strong>Repair:</strong> Use "Retry the ones I missed" and the per-topic scores to target weak areas. Repeat a few days later.</li>
+        </ol>
+      </details>
+
+      <details class="card">
+        <summary><h2 class="inline">Keyboard shortcuts</h2></summary>
+        <dl class="keys">
+          <dt><kbd>1</kbd>–<kbd>4</kbd> or <kbd>A</kbd>–<kbd>D</kbd></dt><dd>Choose an option</dd>
+          <dt><kbd>Enter</kbd></dt><dd>Check answer (study mode) / next question</dd>
+          <dt><kbd>N</kbd> / <kbd>P</kbd></dt><dd>Next / previous question</dd>
+          <dt><kbd>F</kbd></dt><dd>Flag / unflag for review</dd>
+        </dl>
+      </details>
+    </section>
+
+    <!-- ============ QUIZ ============ -->
+    <section id="view-quiz" hidden aria-labelledby="q-heading">
+      <div class="quiz-top">
+        <p id="q-counter" class="counter"></p>
+        <div class="progress" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
+        <p id="q-domain" class="domain-tag"></p>
+      </div>
+
+      <div id="paused-overlay" class="card paused" hidden>
+        <h2>Paused</h2>
+        <p>The timer is stopped and the question is hidden. Take the time you need.</p>
+        <button type="button" id="unpause-btn" class="btn btn-primary">Resume</button>
+      </div>
+
+      <form id="q-form" class="card question-card" novalidate>
+        <fieldset>
+          <legend class="q-legend">
+            <h2 id="q-heading" tabindex="-1"></h2>
+          </legend>
+          <div id="q-options" class="options"></div>
+        </fieldset>
+
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+
+        <div class="btn-row q-actions">
+          <button type="button" id="prev-btn" class="btn">← Previous</button>
+          <button type="button" id="flag-btn" class="btn" aria-pressed="false">Flag for review</button>
+          <button type="submit" id="check-btn" class="btn btn-primary">Check answer</button>
+          <button type="button" id="next-btn" class="btn btn-primary">Next →</button>
+        </div>
+      </form>
+
+      <details id="palette-box" class="card">
+        <summary><h2 class="inline">Question map</h2> <span id="palette-summary" class="hint"></span></summary>
+        <p class="hint">Legend: <span class="legend ans">answered</span> <span class="legend flag">⚑ flagged</span> <span class="legend cur">current</span></p>
+        <nav aria-label="Question map"><ol id="palette" class="palette"></ol></nav>
+      </details>
+
+      <div class="btn-row end-row">
+        <button type="button" id="finish-btn" class="btn btn-danger">Finish &amp; see results</button>
+        <button type="button" id="quit-btn" class="btn">Quit to start</button>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section id="view-results" hidden aria-labelledby="r-heading">
+      <h1 id="r-heading" tabindex="-1">Your results</h1>
+      <div class="card score-card">
+        <p class="score-big"><span id="r-score"></span></p>
+        <p id="r-band" class="band"></p>
+        <p id="r-meta" class="hint"></p>
+      </div>
+
+      <div class="card">
+        <h2>Score by topic</h2>
+        <div class="table-wrap">
+          <table class="domain-table">
+            <caption class="visually-hidden">Correct answers per handbook topic</caption>
+            <thead><tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Score</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+            <tbody id="r-domains"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" id="retry-missed-btn" class="btn btn-primary">Retry the ones I missed (study mode)</button>
+        <button type="button" id="home-btn" class="btn">Back to start</button>
+      </div>
+
+      <div class="card">
+        <h2>Review</h2>
+        <fieldset class="filter">
+          <legend>Show</legend>
+          <label><input type="radio" name="rfilter" value="wrong" checked> Missed &amp; unanswered</label>
+          <label><input type="radio" name="rfilter" value="flagged"> Flagged</label>
+          <label><input type="radio" name="rfilter" value="all"> All</label>
+        </fieldset>
+        <p id="r-review-count" class="hint" aria-live="polite"></p>
+        <ol id="r-review" class="review-list"></ol>
+      </div>
+    </section>
+
+    <noscript><p class="card">This practice exam needs JavaScript enabled.</p></noscript>
+  </main>
+
+  <footer class="site-footer wrap">
+    <p>Independent study aid. Questions are original and paraphrase concepts from the INCOSE Systems Engineering Handbook (5th Ed.) and ISO/IEC/IEEE 15288:2023; they are not official INCOSE exam items. Always confirm against the handbook.</p>
+  </footer>
+
+  <script src="questions/_bank.js"></script>
+  <script src="questions/01-intro.js"></script>
+  <script src="questions/02-lifecycle.js"></script>
+  <script src="questions/03-agreement-org.js"></script>
+  <script src="questions/04-techmgmt.js"></script>
+  <script src="questions/05-technical-a.js"></script>
+  <script src="questions/06-technical-b.js"></script>
+  <script src="questions/07-analyses.js"></script>
+  <script src="questions/08-tailoring-practice.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
